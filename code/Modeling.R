@@ -4,7 +4,6 @@ if(length(setdiff(packages, rownames(installed.packages())))!=0){
 }else{
   print("All installed")
 }
-
 library(quantreg)
 library(QuantPsyc)
 library(caret)
@@ -15,7 +14,6 @@ library(foreach)
 library(doParallel)
 library(EXRQ)
 library(rqPen)
-
 ######################################################################
 ###################  validation_tool function  #######################
 ######################################################################
@@ -416,3 +414,4 @@ ThreeStage_lasso_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1)
   out = list(coef=coeff,lam = lam, k = k, Q3Stage = Q3Stage, Q3StageP = Q3StageP, gamma.x = gamma.x, cgamma = cgamma)
   return(out)
 }
+
