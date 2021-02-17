@@ -40,7 +40,7 @@ validation_tool<-function(true_y, pred_y, threshold=76){
 }
 
 ######################################################################
-################  PowT.1tau.func function overwriting ################
+################  PowT.1tau.func1 function overriding ################
 ######################################################################
 
 PowT.1tau.func1 <-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
@@ -82,7 +82,7 @@ PowT.1tau.func1 <-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
 
 
 ######################################################################
-################  select.k.func_lasso_cv function  ###################
+################  ThreeStage function  ###############################
 ######################################################################
 
 ThreeStage = function (y, x, xstar, tau.e, grid.lam = seq(-2, 2, 0.1), grid.k, 
@@ -315,12 +315,12 @@ PowT.1tau.func_lasso_cv<-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
     Rn <- apply(Rn, 2, sum)/n
     Vn <- c(Vn, mean(Rn^2))
   }
-  idx <- order(Vn)[1]
+  Vn=round(Vn,4)
+  idx <- which(Vn==min(Vn))[length(which(Vn==min(Vn)) )]
   lam <- lams[idx]
   coef <- bhat[idx, ]
   return(list(lam = lam, coef = bhat))
 }
-
 
 ######################################################################
 ###################  ThreeStage_lasso_cv function ####################
