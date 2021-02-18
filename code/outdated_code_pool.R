@@ -225,3 +225,88 @@ for (j in region_name){
 }
 
 save(ThreeStage_CVLASSO_out_parallel,file = "./data/0217ThreeStage_CVLASSO_out_parallel.R")
+
+
+
+ThreeStage_CVLASSO_out_parallel
+
+
+
+##### Performance of TS and TSL #####
+library(xtable)
+
+latex_perf_ftn = function(true,data1,data2){
+  taus3 = c("0.95","0.98","0.99","0.995")
+  TS_perf=data1
+  TS_perf=TS_perf$taulam0.95
+  One_region_data = true$testy
+  
+  
+  
+  ##### TS #####
+  TS_perf_95=validation_tool(as.vector(One_region_data),TS_perf$Q3StageP[,1])
+  TS_perf_98=validation_tool(as.vector(One_region_data),TS_perf$Q3StageP[,2])
+  TS_perf_99=validation_tool(as.vector(One_region_data),TS_perf$Q3StageP[,3])
+  TS_perf_995=validation_tool(as.vector(One_region_data),TS_perf$Q3StageP[,4])
+  
+  
+  
+  All_TS_one_region=data.frame(rbind(c(TS_perf_95$senc,TS_perf_95$spec,TS_perf_95$FN,TS_perf_95$FP),
+                 c(TS_perf_98$senc,TS_perf_98$spec,TS_perf_98$FN,TS_perf_98$FP),
+                 c(TS_perf_99$senc,TS_perf_99$spec,TS_perf_99$FN,TS_perf_99$FP),
+                 c(TS_perf_995$senc,TS_perf_995$spec,TS_perf_995$FN,TS_perf_995$FP)))
+  All_TS_one_region=round(All_TS_one_region,3)
+  
+  All_TS_one_region=cbind(taus3,All_TS_one_region)
+  
+  
+  ##### TSL #####
+  
+  TSL_perf=data2
+  TSL_perf=TSL_perf$taulam0.95
+  
+  TSL_perf_95=validation_tool(as.vector(One_region_data),TSL_perf$Q3StageP[,1])
+  TSL_perf_98=validation_tool(as.vector(One_region_data),TSL_perf$Q3StageP[,2])
+  TSL_perf_99=validation_tool(as.vector(One_region_data),TSL_perf$Q3StageP[,3])
+  TSL_perf_995=validation_tool(as.vector(One_region_data),TSL_perf$Q3StageP[,4])
+  
+  
+  
+  All_TSL_one_region=data.frame(rbind(
+                                  c(TSL_perf_95$senc,TSL_perf_95$spec,TSL_perf_95$FN,TSL_perf_95$FP),
+                                 c(TSL_perf_98$senc,TSL_perf_98$spec,TSL_perf_98$FN,TSL_perf_98$FP),
+                                 c(TSL_perf_99$senc,TSL_perf_99$spec,TSL_perf_99$FN,TSL_perf_99$FP),
+                                 c(TSL_perf_995$senc,TSL_perf_995$spec,TSL_perf_995$FN,TSL_perf_995$FP)))
+  All_TSL_one_region=round(All_TSL_one_region,3)
+  
+  All_TSL_one_region=cbind(taus3,All_TSL_one_region)
+  
+  
+  ##### Binding and xtable #####
+  texbind = rbind(All_TS_one_region,All_TSL_one_region,All_TSL_one_region)
+  
+  
+  texbind=cbind(emp1,emp1,texbind)
+  
+  
+  addtorow <- list()
+  addtorow$pos <- list(0, 4,4,8,8)
+  
+  addtorow$command <- c("\\multirow{4}{*}{Three Stage Model} \n",
+                        "\\cline{2-7} \n",
+                        "& \\multirow{4}{*}{Three Stage Model with LASSO} \n",
+                        "\\cline{2-7} \n",
+                        "& \\multirow{4}{*}{Other_model} \n")
+  
+  print(xtable(texbind), add.to.row = addtorow, include.colnames = FALSE,include.rownames=FALSE)
+}
+
+
+
+
+
+for (i in c(1)){
+  latex_perf_ftn(outlist[[region_name[i]]],
+               bacigThreeStage_out_parallel[[region_name[i]]],
+               ThreeStage_CVLASSO_out_parallel[[region_name[i]]])
+}
