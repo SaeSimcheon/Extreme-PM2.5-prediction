@@ -178,6 +178,10 @@ region_name=names(data$Meteorological_data$precip)[names(data$Meteorological_dat
 tau.e_Vec =c(0.950, 0.980, 0.990, 0.995)
 tau.lam_Vec = c(0.95)
 
+
+
+
+PowT.1tau.func1
 baciThreeStage_parallel=function(data,tau.es=tau.e_Vec,tau.lams=tau.lam_Vec){
   one_list = list()
   for (tau.lam_fixed in tau.lams){
@@ -296,17 +300,357 @@ latex_perf_ftn = function(true,data1,data2){
                         "\\cline{2-7} \n",
                         "& \\multirow{4}{*}{Three Stage Model with LASSO} \n",
                         "\\cline{2-7} \n",
-                        "& \\multirow{4}{*}{Other_model} \n")
+                        "& \\multirow{4}{*}{Other model} \n")
   
-  print(xtable(texbind), add.to.row = addtorow, include.colnames = FALSE,include.rownames=FALSE)
+  print(xtable(texbind,digits = c(NA,NA,NA,NA,3,3,3,3)), add.to.row = addtorow, include.colnames = FALSE,include.rownames=FALSE)
 }
 
 
 
 
-
-for (i in c(1)){
+for (i in c(1,11,21)){
+  print(region_name[i])
   latex_perf_ftn(outlist[[region_name[i]]],
                bacigThreeStage_out_parallel[[region_name[i]]],
                ThreeStage_CVLASSO_out_parallel[[region_name[i]]])
 }
+
+
+
+
+
+
+
+
+
+##### Performance measurement plot ; resional comparaison#####
+figure5 = function(true,data1,data2,region){
+  taus3 = c("0.95","0.98","0.99","0.995")
+  TS_perf=data1
+  TS_perf=TS_perf$taulam0.95
+  One_region_data = true$testy
+  
+  
+  
+  ##### TS #####
+  TS_perf_95=validation_tool(as.vector(One_region_data),TS_perf$Q3StageP[,1])
+  TS_perf_98=validation_tool(as.vector(One_region_data),TS_perf$Q3StageP[,2])
+  TS_perf_99=validation_tool(as.vector(One_region_data),TS_perf$Q3StageP[,3])
+  TS_perf_995=validation_tool(as.vector(One_region_data),TS_perf$Q3StageP[,4])
+  
+  
+  
+  All_TS_one_region=data.frame(rbind(c(TS_perf_95$senc,TS_perf_95$spec,TS_perf_95$FN,TS_perf_95$FP),
+                                     c(TS_perf_98$senc,TS_perf_98$spec,TS_perf_98$FN,TS_perf_98$FP),
+                                     c(TS_perf_99$senc,TS_perf_99$spec,TS_perf_99$FN,TS_perf_99$FP),
+                                     c(TS_perf_995$senc,TS_perf_995$spec,TS_perf_995$FN,TS_perf_995$FP)))
+  All_TS_one_region=round(All_TS_one_region,3)
+  
+  All_TS_one_region=cbind(taus3,All_TS_one_region)
+  
+  All_TS_one_region$model = "TS"
+  
+  ##### TSL #####
+  
+  TSL_perf=data2
+  TSL_perf=TSL_perf$taulam0.95
+  
+  TSL_perf_95=validation_tool(as.vector(One_region_data),TSL_perf$Q3StageP[,1])
+  TSL_perf_98=validation_tool(as.vector(One_region_data),TSL_perf$Q3StageP[,2])
+  TSL_perf_99=validation_tool(as.vector(One_region_data),TSL_perf$Q3StageP[,3])
+  TSL_perf_995=validation_tool(as.vector(One_region_data),TSL_perf$Q3StageP[,4])
+  
+  
+  
+  All_TSL_one_region=data.frame(rbind(
+    c(TSL_perf_95$senc,TSL_perf_95$spec,TSL_perf_95$FN,TSL_perf_95$FP),
+    c(TSL_perf_98$senc,TSL_perf_98$spec,TSL_perf_98$FN,TSL_perf_98$FP),
+    c(TSL_perf_99$senc,TSL_perf_99$spec,TSL_perf_99$FN,TSL_perf_99$FP),
+    c(TSL_perf_995$senc,TSL_perf_995$spec,TSL_perf_995$FN,TSL_perf_995$FP)))
+  All_TSL_one_region=round(All_TSL_one_region,3)
+  
+  All_TSL_one_region=cbind(taus3,All_TSL_one_region)
+  All_TSL_one_region$model = "TSL"
+  
+  ##### other model #####
+  All_TSL_one_region1 = All_TSL_one_region
+  All_TSL_one_region1$model = "other model"
+  
+  ##### Binding and xtable #####
+  texbind = rbind(All_TS_one_region,All_TSL_one_region,All_TSL_one_region1)
+  texbind$region = region
+  names(texbind) = c("tau.e","sen","spe","FN","FP","model","region")
+  return(texbind)
+}
+
+ett=data.frame()
+
+en_region_name = c("Gangnam",
+                   "Gangdong",
+                   "Gangbuk",
+                   "Gangseo","Gwanak","Gwangjin","Guro",
+                   "Geumcheon","Nowon","Dobong","Dongdaemun","Dongjak","Mapo",
+                   "Seodaemun","Seocho","Seongdong  ","Seongbuk","Songpa","Yangcheon",
+                   "Yeongdeungpo","Yongsan","Eunpyeong","Jongno","Jung","Jungnang")
+
+
+for (i in 1:25){
+  testout=figure5(outlist[[region_name[i]]],
+                          bacigThreeStage_out_parallel[[region_name[i]]],
+                          ThreeStage_CVLASSO_out_parallel[[region_name[i]]],
+                  en_region_name[i])
+  ett = rbind(ett,testout)
+  }
+
+
+figure_sen_ftn=
+  function(data){
+  g1=data[data$tau.e==0.95,] %>% ggplot(aes(x=as.factor(region),y = sen,fill =model))+
+    xlab("region")+
+    geom_bar(stat='identity',position = 'dodge')+
+    coord_flip() + 
+    scale_fill_grey()+
+    theme_bw()+ ggtitle('Tau.e=0.95')
+  
+  g2=data[data$tau.e==0.98,] %>% ggplot(aes(x=as.factor(region),y = sen,fill =model))+
+    xlab("region")+
+    geom_bar(stat='identity',position = 'dodge')+
+    coord_flip() + 
+    scale_fill_grey()+
+    theme_bw()+ ggtitle('Tau.e=0.98')
+  
+  
+  g3=data[data$tau.e==0.99,] %>% ggplot(aes(x=as.factor(region),y = sen,fill =model))+
+    xlab("region")+
+    geom_bar(stat='identity',position = 'dodge')+
+    coord_flip() + 
+    scale_fill_grey()+
+    theme_bw()+ ggtitle('Tau.e=0.99')
+  
+  
+  g4=data[data$tau.e==0.995,] %>% ggplot(aes(x=as.factor(region),y = sen,fill =model))+
+    xlab("region")+
+    geom_bar(stat='identity',position = 'dodge')+
+    coord_flip() + 
+    scale_fill_grey()+
+    theme_bw()+ ggtitle('Tau.e=0.995')
+  grid.arrange(g1,g2,g3,g4, nrow=2, ncol=2)
+  }
+figure_spe_ftn=
+  function(data){
+    g1=data[data$tau.e==0.95,] %>% ggplot(aes(x=as.factor(region),y = spe,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.95')
+    
+    g2=data[data$tau.e==0.98,] %>% ggplot(aes(x=as.factor(region),y = spe,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.98')
+    
+    
+    g3=data[data$tau.e==0.99,] %>% ggplot(aes(x=as.factor(region),y = spe,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.99')
+    
+    
+    g4=data[data$tau.e==0.995,] %>% ggplot(aes(x=as.factor(region),y = spe,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.995')
+    grid.arrange(g1,g2,g3,g4, nrow=2, ncol=2)
+  }
+figure_FN_ftn=
+  function(data){
+    g1=data[data$tau.e==0.95,] %>% ggplot(aes(x=as.factor(region),y = FN,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.95')
+    
+    g2=data[data$tau.e==0.98,] %>% ggplot(aes(x=as.factor(region),y = FN,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.98')
+    
+    
+    g3=data[data$tau.e==0.99,] %>% ggplot(aes(x=as.factor(region),y = FN,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.99')
+    
+    
+    g4=data[data$tau.e==0.995,] %>% ggplot(aes(x=as.factor(region),y = FN,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.995')
+    grid.arrange(g1,g2,g3,g4, nrow=2, ncol=2)
+  }
+figure_FP_ftn=
+  function(data){
+    g1=data[data$tau.e==0.95,] %>% ggplot(aes(x=as.factor(region),y = FP,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.95')
+    
+    g2=data[data$tau.e==0.98,] %>% ggplot(aes(x=as.factor(region),y = FP,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.98')
+    
+    
+    g3=data[data$tau.e==0.99,] %>% ggplot(aes(x=as.factor(region),y = FP,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.99')
+    
+    
+    g4=data[data$tau.e==0.995,] %>% ggplot(aes(x=as.factor(region),y = FP,fill =model))+
+      xlab("region")+
+      geom_bar(stat='identity',position = 'dodge')+
+      coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Tau.e=0.995')
+    grid.arrange(g1,g2,g3,g4, nrow=2, ncol=2)
+  }
+
+
+figure_sen_ftn(ett)
+figure_spe_ftn(ett)
+figure_FN_ftn(ett)
+figure_FP_ftn(ett)
+
+png("./data/All_in_plot_perf_sen.png",width = 1000, height = 750)
+figure_sen_ftn(ett)
+dev.off()
+
+
+png("./data/All_in_plot_perf_spe.png",width = 1000, height = 750)
+figure_spe_ftn(ett)
+dev.off()
+
+
+png("./data/All_in_plot_perf_FN.png",width = 1000, height = 750)
+figure_FN_ftn(ett)
+dev.off()
+
+
+png("./data/All_in_plot_perf_FP.png",width = 1000, height = 750)
+figure_FP_ftn(ett)
+dev.off()
+
+
+##### Performance measurement plot ; mean comparaison#####
+library(dplyr)
+
+summarise_df=ett %>% group_by(model,tau.e) %>% summarise_all(funs(mean(., na.rm = TRUE)))
+
+summarise_df=subset(summarise_df,select = -c(region))
+
+summarise_df
+
+
+
+summarise_plot=
+  function(data){
+    g1=data %>% ggplot(aes(x=as.factor(tau.e),y = sen,group =model))+
+      xlab("region")+
+      geom_line(aes(linetype  = model))+
+      #coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Sensitivity')
+    
+    g2=data %>% ggplot(aes(x=as.factor(tau.e),y = spe,group =model))+
+      xlab("region")+
+      geom_line(aes(linetype  = model))+
+      #coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('Specificity')
+    
+    
+    g3=data %>% ggplot(aes(x=as.factor(tau.e),y = FP,group =model))+
+      xlab("region")+
+      geom_line(aes(linetype  = model))+
+      #coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('FN')
+    
+    
+    g4=data %>% ggplot(aes(x=as.factor(tau.e),y = FN,group =model))+
+      xlab("region")+
+      geom_line(aes(linetype  = model))+
+      #coord_flip() + 
+      scale_fill_grey()+
+      theme_bw()+ ggtitle('FP')
+    grid.arrange(g1,g2,g3,g4, nrow=2, ncol=2)
+  }
+
+
+summarise_plot(summarise_df)
+
+
+##### Missing counting #####
+##### The regions which have many missing values in TSL result. #####
+
+TS_missing_df=data.frame()
+
+
+count_missing = function(data){
+  missing_vec=t(apply(is.na(data$Q3StageP),2,sum))
+  return(missing_vec)
+}
+
+for (i in 1:25){
+  datadata=bacigThreeStage_out_parallel[[region_name[i]]]$taulam0.95
+  TS_missing_df = rbind(TS_missing_df,count_missing(datadata))
+}
+
+TS_missing_df$region = en_region_name
+
+
+xtable(TS_missing_df)
+
+
+TSL_missing_df=data.frame()
+
+
+count_missing = function(data){
+  missing_vec=t(apply(is.na(data$Q3StageP),2,sum))
+  return(missing_vec)
+}
+
+for (i in 1:25){
+  datadata=ThreeStage_CVLASSO_out_parallel[[region_name[i]]]$taulam0.95
+  TSL_missing_df = rbind(TSL_missing_df,count_missing(datadata))
+}
+
+TSL_missing_df$region = en_region_name
+TSL_missing_df
+
+
+xtable(TSL_missing_df)
+
+
+
