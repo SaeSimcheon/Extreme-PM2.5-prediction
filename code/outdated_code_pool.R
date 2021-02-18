@@ -578,6 +578,7 @@ summarise_plot=
     g1=data %>% ggplot(aes(x=as.factor(tau.e),y = sen,group =model))+
       xlab("region")+
       geom_line(aes(linetype  = model))+
+      geom_point()+
       #coord_flip() + 
       scale_fill_grey()+
       theme_bw()+ ggtitle('Sensitivity')
@@ -585,6 +586,7 @@ summarise_plot=
     g2=data %>% ggplot(aes(x=as.factor(tau.e),y = spe,group =model))+
       xlab("region")+
       geom_line(aes(linetype  = model))+
+      geom_point()+
       #coord_flip() + 
       scale_fill_grey()+
       theme_bw()+ ggtitle('Specificity')
@@ -593,6 +595,7 @@ summarise_plot=
     g3=data %>% ggplot(aes(x=as.factor(tau.e),y = FP,group =model))+
       xlab("region")+
       geom_line(aes(linetype  = model))+
+      geom_point()+
       #coord_flip() + 
       scale_fill_grey()+
       theme_bw()+ ggtitle('FN')
@@ -601,6 +604,7 @@ summarise_plot=
     g4=data %>% ggplot(aes(x=as.factor(tau.e),y = FN,group =model))+
       xlab("region")+
       geom_line(aes(linetype  = model))+
+      geom_point()+
       #coord_flip() + 
       scale_fill_grey()+
       theme_bw()+ ggtitle('FP')
