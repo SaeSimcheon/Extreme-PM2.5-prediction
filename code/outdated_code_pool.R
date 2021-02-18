@@ -113,68 +113,48 @@ ggplot() + geom_polygon(data = P_merge, aes(x=long, y=lat, group=group), fill = 
 dev.off()
 ##### Figure2 code #####
 forplot_GN = c(outlist[["강남구"]]$trainy,outlist[["강남구"]]$testy)
-forplot_GN["2015"]
-par(mfrow=c(6,1))
-
-TSData<-data.frame(data$Airpollution_data$PM25[,"강남구"],row.names=data$Airpollution_data$PM25[,1])
-rm_index=c( 1: (which(rownames(TSData)=='2015-01-01 00:00:00' ))  ) 
-TSData2=data.frame( TSData[- rm_index , ] , row.names=rownames(TSData)[-rm_index])
-
-TSData2[which(is.na(TSData2)==T), ] =approx(TSData2, xout=which(is.na(TSData2)==T))$y
-TSData=TSData2
-
-PM25<-as.xts(TSData)
 
 
-
-png("./data/GN_spring_plot1.png",width = 800, height = 300)
+png("./data/GN_spring_plot1.png",width = 1000, height = 300)
 par(mfrow=c(1,3))
-plot(index(forplot_GN["2015-3/2015-5"]),as.vector(forplot_GN["2015-3/2015-5"]),type = "l",main="Spring 2015 of Gangnam",ylab = "PM2.5",xlab = "Month")
-plot(index(forplot_GN["2016-3/2016-5"]),as.vector(forplot_GN["2016-3/2016-5"]),type = "l",main="Spring 2016 of Gangnam",ylab = "PM2.5",xlab = "Month")
-plot(index(forplot_GN["2017-3/2017-5"]),as.vector(forplot_GN["2017-3/2017-5"]),type = "l",main="Spring 2017 of Gangnam",ylab = "PM2.5",xlab = "Month")
+plot(index(forplot_GN["2015-3/2015-5"]),as.vector(forplot_GN["2015-3/2015-5"]),type = "l",main="Spring 2015 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+plot(index(forplot_GN["2016-3/2016-5"]),as.vector(forplot_GN["2016-3/2016-5"]),type = "l",main="Spring 2016 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+plot(index(forplot_GN["2017-3/2017-5"]),as.vector(forplot_GN["2017-3/2017-5"]),type = "l",main="Spring 2017 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
 dev.off()
 
 png("./data/GN_spring_plot2.png",width = 1000, height =300)
 par(mfrow=c(1,3))
-plot(index(forplot_GN["2018-3/2018-5"]),as.vector(forplot_GN["2018-3/2018-5"]),type = "l",main="Spring 2018 of Gangnam",ylab = "PM2.5",xlab = "Month")
-plot(index(forplot_GN["2019-3/2019-5"]),as.vector(forplot_GN["2019-3/2019-5"]),type = "l",main="Spring 2019 of Gangnam",ylab = "PM2.5",xlab = "Month")
-plot(index(forplot_GN["2020-3/2020-5"]),as.vector(forplot_GN["2020-3/2020-5"]),type = "l",main="Spring 2020 of Gangnam",ylab = "PM2.5",xlab = "Month")
+plot(index(forplot_GN["2018-3/2018-5"]),as.vector(forplot_GN["2018-3/2018-5"]),type = "l",main="Spring 2018 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+plot(index(forplot_GN["2019-3/2019-5"]),as.vector(forplot_GN["2019-3/2019-5"]),type = "l",main="Spring 2019 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+plot(index(forplot_GN["2020-3/2020-5"]),as.vector(forplot_GN["2020-3/2020-5"]),type = "l",main="Spring 2020 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
 dev.off()
 
 
-png("./data/GN_spring_plot3.png",width = 500, height = 1000)
-par(mfrow=c(6,1))
-
-
-plot(as.vector(PM25["2015-3/2015-5"]),type = "l",main="Spring 2015 of Gangnam",ylab = "PM2.5",xlab = "2015-03-01 00:00:00 to 2015-05-31 23:00:00 ")
-plot(as.vector(PM25["2016-3/2016-5"]),type = "l",main="Spring 2016 of Gangnam",ylab = "PM2.5",xlab = "2016-03-01 00:00:00 to 2016-05-31 23:00:00 ")
-plot(as.vector(PM25["2017-3/2017-5"]),type = "l",main="Spring 2017 of Gangnam",ylab = "PM2.5",xlab = "2017-03-01 00:00:00 to 2017-05-31 23:00:00 ")
-plot(as.vector(PM25["2018-3/2018-5"]),type = "l",main="Spring 2018 of Gangnam",ylab = "PM2.5",xlab = "2018-03-01 00:00:00 to 2018-05-31 23:00:00 ")
-plot(as.vector(PM25["2019-3/2019-5"]),type = "l",main="Spring 2019 of Gangnam",ylab = "PM2.5",xlab = "2019-03-01 00:00:00 to 2019-05-31 23:00:00 ")
-plot(as.vector(PM25["2020-3/2020-5"]),type = "l",main="Spring 2020 of Gangnam",ylab = "PM2.5",xlab = "2020-03-01 00:00:00 to 2020-05-29 19:00:00 ")
+png("./data/GN_spring_plot3.png",width = 300, height = 1000)
+par(mfrow=c(3,1))
+plot(index(forplot_GN["2015-3/2015-5"]),as.vector(forplot_GN["2015-3/2015-5"]),type = "l",main="Spring 2015 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+plot(index(forplot_GN["2016-3/2016-5"]),as.vector(forplot_GN["2016-3/2016-5"]),type = "l",main="Spring 2016 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+plot(index(forplot_GN["2017-3/2017-5"]),as.vector(forplot_GN["2017-3/2017-5"]),type = "l",main="Spring 2017 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
 dev.off()
 
-
-
-
-
-
-
-plot(as.vector(PM25["2015-3/2015-5"]),type = "l",main="Spring 2015 of Gangnam",ylab = "PM2.5",xlab = "2015-03-01 00:00:00 to 2015-05-31 23:00:00 ")
-points(as.vector(PM25["2016-3/2016-5"]),col= "red",type = "l",main="Spring 2015 of Gangnam",ylab = "PM2.5",xlab = "2015-03-01 00:00:00 to 2015-05-31 23:00:00 ")
-
-
-
-
-
-library(ggplot2)
-PM25["2015-3/2015-5"] = NA
-PM25["2015-3/2015-5",] = "y2015"
-
-
-g <- ggplot(data.frame(Time, Value, Group)) + 
-  geom_line (aes(x=Time, y=Value)) +
-  facet_grid(~ Group, scales = "free_x")
+png("./data/GN_spring_plot4.png",width = 300, height =1000)
+par(mfrow=c(3,1))
+plot(index(forplot_GN["2018-3/2018-5"]),as.vector(forplot_GN["2018-3/2018-5"]),type = "l",main="Spring 2018 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+plot(index(forplot_GN["2019-3/2019-5"]),as.vector(forplot_GN["2019-3/2019-5"]),type = "l",main="Spring 2019 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+plot(index(forplot_GN["2020-3/2020-5"]),as.vector(forplot_GN["2020-3/2020-5"]),type = "l",main="Spring 2020 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
+abline(h=76,lty="dashed")
+dev.off()
 
 
 ##### Figure3 code : correlation #####
