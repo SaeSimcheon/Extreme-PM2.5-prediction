@@ -45,3 +45,37 @@ fit = hmmfit(train,model,mstep=mstep.mvnorm)
 
 
 predict(fit,test1$testx[1:10,1:2])
+
+
+
+?auto.arima
+
+
+arimafit=auto.arima(test1$trainy,xreg = as.matrix(test1$trainx[,c(1:4,6:10)]))
+
+
+fore=forecast(arimafit,h=2199,xreg = test1$testx[1:2199,c(1:4,6:10)])
+
+validation_tool(as.vector(test1$testy),fore$mean)
+
+
+ARIMAX_out = list()
+for (j in region_name){
+  print(j)
+  one_region=auto.arima(as.vector(outlist[[j]]$trainy),xreg =fourier(as.vector(outlist[[j]]$trainy),K = 24) ,seasonal = F,labmda = 0, )
+  fore=forecast(arimafit,h=2199,xreg = outlist[[j]]$testx[1:2199,c(1:4,6:10)])
+  print(sum(fore$mean>76))
+  ARIMAX_out[[j]] =fore
+}
+
+
+cafe04 <- window(auscafe, start=2004)
+
+fourier(as.ts(as.vector(outlist[[j]]$trainy)),K = 1)
+
+fourier
+ts
+oneone=ARIMAX_out$중랑구
+sum(oneone$mean>76)
+
+

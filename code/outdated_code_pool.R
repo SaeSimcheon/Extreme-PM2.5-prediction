@@ -658,3 +658,19 @@ xtable(TSL_missing_df)
 
 
 
+EVI.CFG.func
+
+
+
+
+n = 1000
+k = 50
+
+1-n^(-0.9)
+
+(n - as.integer(n^(0.1)))/(n + 1)
+
+
+
+
+select.k.func
