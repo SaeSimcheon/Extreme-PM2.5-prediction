@@ -86,7 +86,7 @@ PowT.1tau.func1 <-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
 ######################################################################
 
 ThreeStage = function (y, x, xstar, tau.e, grid.lam = seq(-2, 2, 0.1), grid.k, 
-          tau.lam, a = 0, tol = 1e-04) 
+                       tau.lam, a = 0, tol = 1e-04) 
 {
   x = as.matrix(x)
   n = length(y)
@@ -95,7 +95,7 @@ ThreeStage = function (y, x, xstar, tau.e, grid.lam = seq(-2, 2, 0.1), grid.k,
   max.tau = (n - as.integer(n^(0.1)))/(n + 1)
   if (length(grid.lam) > 1) {
     tmp = PowT.1tau.func1(y, x, tau = tau.lam, lams = grid.lam, 
-                         a)
+                          a)
     lam = tmp$lam
   }
   else if (length(grid.lam) == 1) 
@@ -139,7 +139,7 @@ ThreeStage = function (y, x, xstar, tau.e, grid.lam = seq(-2, 2, 0.1), grid.k,
 ######################################################################
 
 select.k.func_lasso_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_type="rmse") 
-  {
+{
   obj = NULL
   grid.k = grid.k[grid.k > as.integer((1 - max.tau) * n) + 
                     1]

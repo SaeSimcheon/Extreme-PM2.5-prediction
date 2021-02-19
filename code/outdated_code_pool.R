@@ -142,7 +142,7 @@ abline(h=76,lty="dashed")
 dev.off()
 
 
-png("./data/GN_spring_plot3.png",width = 300, height = 1000)
+png("./data/GN_spring_plot3.png",width = 1000, height = 700)
 par(mfrow=c(3,1))
 plot(index(forplot_GN["2015-3/2015-5"]),as.vector(forplot_GN["2015-3/2015-5"]),type = "l",main="Spring 2015 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
 points(index(forplot_GN["2015-3/2015-5"]),as.vector(forplot_GN["2015-3/2015-5"]),main="Spring 2015 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
@@ -155,7 +155,7 @@ points(index(forplot_GN["2017-3/2017-5"]),as.vector(forplot_GN["2017-3/2017-5"])
 abline(h=76,lty="dashed")
 dev.off()
 
-png("./data/GN_spring_plot4.png",width = 300, height =1000)
+png("./data/GN_spring_plot4.png",width = 1000, height =700)
 par(mfrow=c(3,1))
 plot(index(forplot_GN["2018-3/2018-5"]),as.vector(forplot_GN["2018-3/2018-5"]),type = "l",main="Spring 2018 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
 points(index(forplot_GN["2018-3/2018-5"]),as.vector(forplot_GN["2018-3/2018-5"]),main="Spring 2018 of Gangnam",ylab = "PM2.5",xlab = "Month",ylim=c(0, 150))
@@ -180,7 +180,6 @@ cor(forcol_data_GN)
 png("./data/GN_corrplot.png",width = 500, height = 500)
 GGally::ggcorr(forcol_data_GN, nbreaks=8, palette='RdGy', label=TRUE, label_size=5, label_color='white')
 dev.off()
-
 
 ##### 0115~upto0202 #####
 region_name=names(data$Meteorological_data$precip)[names(data$Meteorological_data$precip)!="일시"]
@@ -576,7 +575,7 @@ dev.off()
 
 ##### Performance measurement plot ; mean comparaison#####
 library(dplyr)
-
+library(gridExtra)
 summarise_df=ett %>% group_by(model,tau.e) %>% summarise_all(funs(mean(., na.rm = TRUE)))
 
 summarise_df=subset(summarise_df,select = -c(region))
@@ -623,8 +622,10 @@ summarise_plot=
     grid.arrange(g1,g2,g3,g4, nrow=2, ncol=2)
   }
 
-
+png("./data/Mean_in_plot_perf.png",width = 1000, height = 750)
 summarise_plot(summarise_df)
+dev.off()
+
 
 
 ##### Missing counting #####
