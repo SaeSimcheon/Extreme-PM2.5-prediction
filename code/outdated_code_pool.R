@@ -3,15 +3,14 @@
 source("./EXRQ_research/code/Modeling.R",encoding = "utf-8")
 source("./EXRQ_research/code/DataPreprocessing.R",encoding = "utf-8")
 
-data=readRDS("./data/0729data.rds")
+# data=readRDS("./data/0729data.rds")
 region_name=names(data$Meteorological_data$precip)[names(data$Meteorological_data$precip)!="일시"]
-outlist =list()
-
+# outlist =list()
 for (j in region_name){
   one_region=Data_setup(data =data,location = j)
   outlist[[j]] =one_region
 }
-save(outlist,file = "./data/0119All_regions.R")
+#save(outlist,file = "./data/0119All_regions.R")
 load("./data/0119All_regions.R")
 
 ##### Figure 1 and Table 1 were written manually #####
