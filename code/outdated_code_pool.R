@@ -3,7 +3,7 @@
 source("./EXRQ_research/code/Modeling.R",encoding = "utf-8")
 source("./EXRQ_research/code/DataPreprocessing.R",encoding = "utf-8")
 
-# data=readRDS("./data/0729data.rds")
+data=readRDS("./data/0729data.rds")
 region_name=names(data$Meteorological_data$precip)[names(data$Meteorological_data$precip)!="일시"]
 # outlist =list()
 for (j in region_name){
@@ -314,8 +314,6 @@ latex_perf_ftn = function(true,data1,data2){
   
   print(xtable(texbind,digits = c(NA,NA,NA,NA,3,3,3,3)), add.to.row = addtorow, include.colnames = FALSE,include.rownames=FALSE)
 }
-
-
 
 
 for (i in c(1,11,21)){
@@ -669,20 +667,80 @@ TSL_missing_df
 xtable(TSL_missing_df)
 
 
-
-EVI.CFG.func
-
+##### Checking missing values in professor's TS model #####
 
 
+basic_three_output
 
-n = 1000
-k = 50
+basic_df = data.frame()
+for (i in 1:25){
+  outone = data.frame()
+  print(region_name[i])
+  one_region=basic_three_output[[i]]
+  totalm=c(sum(is.na(one_region[[1]]$Q3StageP)),sum(is.na(one_region[[2]]$Q3StageP)),
+    sum(is.na(one_region[[3]]$Q3StageP)),sum(is.na(one_region[[4]]$Q3StageP)))
+  badm=c(sum((as.vector(is.na(one_region[[1]]$Q3StageP)))&(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76),
+         sum((as.vector(is.na(one_region[[2]]$Q3StageP)))&(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76),
+         sum((as.vector(is.na(one_region[[3]]$Q3StageP)))&(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76),
+         sum((as.vector(is.na(one_region[[4]]$Q3StageP)))&(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76))
+  outone=rbind(outone,totalm,badm)
+  names(outone) = c("0.95","0.98","0.99","0.995")
+  outone$check = c("Total_num_missings","Ratio_missing_in_target")
+  outone$region = c(region_name[i])
+  basic_df = rbind(basic_df,outone)
+  print(outone)
+  #print(validation_tool(true_y = as.vector(outlist[[region_name[i]]]$testy),pred_y = one_region[[1]]$Q3StageP))
+  #print(validation_tool(true_y = as.vector(outlist[[region_name[i]]]$testy),pred_y = one_region[[2]]$Q3StageP))
+  #print(validation_tool(true_y = as.vector(outlist[[region_name[i]]]$testy),pred_y = one_region[[3]]$Q3StageP))
+  #print(validation_tool(true_y = as.vector(outlist[[region_name[i]]]$testy),pred_y = one_region[[4]]$Q3StageP))
+}
 
-1-n^(-0.9)
-
-(n - as.integer(n^(0.1)))/(n + 1)
+basic_df
 
 
+load("./data/0217ThreeStage_CVLASSO_out_parallel.R")
 
 
-select.k.func
+
+sum(is.na(one_region$taulam0.95$Q3StageP[,1])&as.vector(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76)
+
+
+
+apply(is.na(one_region$taulam0.95$Q3StageP),2,sum)
+
+
+out_TSL = data.frame()
+for (i in region_name){
+  outone = data.frame()
+  print(i)
+  one_region=ThreeStage_CVLASSO_out_parallel[[i]]
+  
+  totalm = apply(is.na(one_region$taulam0.95$Q3StageP),2,sum)
+  badm = c(sum(is.na(one_region$taulam0.95$Q3StageP[,1])&as.vector(outlist[[region_name[i]]]$testy >76))/sum(outlist[[i]]$testy >76),
+           sum(is.na(one_region$taulam0.95$Q3StageP[,2])&as.vector(outlist[[region_name[i]]]$testy >76))/sum(outlist[[i]]$testy >76),
+           sum(is.na(one_region$taulam0.95$Q3StageP[,3])&as.vector(outlist[[region_name[i]]]$testy >76))/sum(outlist[[i]]$testy >76),
+           sum(is.na(one_region$taulam0.95$Q3StageP[,4])&as.vector(outlist[[region_name[i]]]$testy >76))/sum(outlist[[i]]$testy >76))
+  outone=rbind(outone,totalm,badm)
+  names(outone) = c("0.95","0.98","0.99","0.995")
+  outone$check = c("Total_num_missings","Ratio_missing_in_target")
+  outone$region = i
+  out_TSL = rbind(out_TSL,outone)
+  print(outone)
+  print(validation_tool(true_y = as.vector(outlist[[i]]$testy),pred_y = one_region$taulam0.95$Q3StageP[,1]))
+  print(validation_tool(true_y = as.vector(outlist[[i]]$testy),pred_y = one_region$taulam0.95$Q3StageP[,2]))
+  print(validation_tool(true_y = as.vector(outlist[[i]]$testy),pred_y = one_region$taulam0.95$Q3StageP[,3]))
+  print(validation_tool(true_y = as.vector(outlist[[i]]$testy),pred_y = one_region$taulam0.95$Q3StageP[,4]))
+}
+
+
+xtable::xtable(basic_df)
+xtable::xtable(out_TSL)
+
+##### Checking TSL vs TS (0226) #####
+
+for (i in c(1,11,21)){
+  print(region_name[i])
+  latex_perf_ftn(outlist[[region_name[i]]],
+                 bacigThreeStage_out_parallel[[region_name[i]]],
+                 ThreeStage_CVLASSO_out_parallel[[region_name[i]]])
+}
