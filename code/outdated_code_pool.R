@@ -668,10 +668,8 @@ xtable(TSL_missing_df)
 
 
 ##### Checking missing values in professor's TS model #####
-
-
+load("./basic_model.Rdata")
 basic_three_output
-
 basic_df = data.frame()
 for (i in 1:25){
   outone = data.frame()
@@ -744,3 +742,100 @@ for (i in c(1,11,21)){
                  bacigThreeStage_out_parallel[[region_name[i]]],
                  ThreeStage_CVLASSO_out_parallel[[region_name[i]]])
 }
+
+gd=basic_three_output[[11]]
+
+gd
+validation_tool(true_y = as.vector(outlist[[region_name[11]]]$testy),pred_y = as.vector(gd[[4]]$Q3StageP))
+
+
+region_name[11]
+
+basic_df_perf = data.frame()
+for (i in 1:25){
+  one_perf = data.frame()
+  outone = data.frame()
+  print(region_name[i])
+  one_region=basic_three_output[[i]]
+  #totalm=c(sum(is.na(one_region[[1]]$Q3StageP)),sum(is.na(one_region[[2]]$Q3StageP)),
+  #         sum(is.na(one_region[[3]]$Q3StageP)),sum(is.na(one_region[[4]]$Q3StageP)))
+  #badm=c(sum((as.vector(is.na(one_region[[1]]$Q3StageP)))&(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76),
+  #       sum((as.vector(is.na(one_region[[2]]$Q3StageP)))&(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76),
+  #       sum((as.vector(is.na(one_region[[3]]$Q3StageP)))&(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76),
+  #       sum((as.vector(is.na(one_region[[4]]$Q3StageP)))&(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76))
+  #outone=rbind(outone,totalm,badm)
+  #names(outone) = c("0.95","0.98","0.99","0.995")
+  #outone$check = c("Total_num_missings","Ratio_missing_in_target")
+  #outone$region = c(region_name[i])
+  #basic_df = rbind(basic_df,outone)
+  #print(outone)
+  perf95=validation_tool(true_y = as.vector(outlist[[region_name[i]]]$testy),pred_y = one_region[[1]]$Q3StageP)
+  perf95_vec=c(perf95$senc,perf95$spec,perf95$FN,perf95$FP)
+  
+  perf98=validation_tool(true_y = as.vector(outlist[[region_name[i]]]$testy),pred_y = one_region[[2]]$Q3StageP)
+  perf98_vec=c(perf98$senc,perf98$spec,perf98$FN,perf98$FP)
+  
+  perf99=validation_tool(true_y = as.vector(outlist[[region_name[i]]]$testy),pred_y = one_region[[3]]$Q3StageP)
+  perf99_vec=c(perf99$senc,perf99$spec,perf99$FN,perf99$FP)
+  
+  perf995=validation_tool(true_y = as.vector(outlist[[region_name[i]]]$testy),pred_y = one_region[[4]]$Q3StageP)
+  perf995_vec=c(perf995$senc,perf995$spec,perf995$FN,perf995$FP)
+  
+  one_perf=rbind(perf95_vec,perf98_vec,perf99_vec,perf995_vec)
+  one_perf=data.frame(one_perf)
+  row.names(one_perf) = NULL
+  one_perf$tau.e = c(0.95,0.98,0.99,0.995)
+  one_perf$region = region_name[i]
+  print(one_perf)
+  basic_df_perf = rbind(basic_df_perf,one_perf)
+  #print(basic_df_perf)
+}
+basic_df_perf=data.frame(basic_df_perf)
+
+names(basic_df_perf) =c("senc","spec","FN","FP","tau.e","region")
+
+load("./data/0217ThreeStage_CVLASSO_out_parallel.R")
+
+
+
+sum(is.na(one_region$taulam0.95$Q3StageP[,1])&as.vector(outlist[[region_name[i]]]$testy >76))/sum(outlist[[region_name[i]]]$testy >76)
+
+
+
+apply(is.na(one_region$taulam0.95$Q3StageP),2,sum)
+
+
+out_TSL = data.frame()
+
+for (i in region_name){
+  outone = data.frame()
+  print(i)
+  one_region=ThreeStage_CVLASSO_out_parallel[[i]]
+  perf95=validation_tool(true_y = as.vector(outlist[[i]]$testy),pred_y = one_region$taulam0.95$Q3StageP[,1])
+  perf95_vec=c(perf95$senc,perf95$spec,perf95$FN,perf95$FP)
+  
+  perf98=validation_tool(true_y = as.vector(outlist[[i]]$testy),pred_y = one_region$taulam0.95$Q3StageP[,2])
+  perf98_vec=c(perf98$senc,perf98$spec,perf98$FN,perf98$FP)
+  
+  perf99=validation_tool(true_y = as.vector(outlist[[i]]$testy),pred_y = one_region$taulam0.95$Q3StageP[,3])
+  perf99_vec=c(perf99$senc,perf99$spec,perf99$FN,perf99$FP)
+  
+  perf995=validation_tool(true_y = as.vector(outlist[[i]]$testy),pred_y = one_region$taulam0.95$Q3StageP[,4])
+  perf995_vec=c(perf995$senc,perf995$spec,perf995$FN,perf995$FP)
+  
+  one_perf=rbind(perf95_vec,perf98_vec,perf99_vec,perf995_vec)
+  one_perf=data.frame(one_perf)
+  row.names(one_perf) = NULL
+  one_perf$tau.e = c(0.95,0.98,0.99,0.995)
+  one_perf$region = i
+  print(one_perf)
+  out_TSL = rbind(out_TSL,one_perf)
+}
+
+
+names(out_TSL) =c("senc","spec","FN","FP","tau.e","region")
+
+sum(basic_df_perf$senc <= out_TSL$senc,na.rm = T)
+
+xtable::xtable(basic_df)
+xtable::xtable(out_TSL)
