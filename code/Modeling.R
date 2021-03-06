@@ -1,4 +1,4 @@
-packages <- c("quantreg", "QuantPsyc", "caret", "xts", "doSNOW", "tcltk", "foreach","doParallel","EXRQ","rqPen")
+packages <- c("quantreg", "QuantPsyc", "caret", "xts", "doSNOW", "tcltk", "foreach","doParallel","EXRQ","rqPen","hqreg")
 if(length(setdiff(packages, rownames(installed.packages())))!=0){
   install.packages(setdiff(packages, rownames(installed.packages())))
 }else{
@@ -13,7 +13,8 @@ library(tcltk)
 library(foreach)
 library(doParallel)
 library(EXRQ)
-library(rqPen)
+#library(rqPen)
+library(hqreg)
 ######################################################################
 ###################  validation_tool function  #######################
 ######################################################################
