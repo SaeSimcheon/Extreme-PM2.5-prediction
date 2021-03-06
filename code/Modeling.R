@@ -139,7 +139,7 @@ ThreeStage = function (y, x, xstar, tau.e, grid.lam = seq(-2, 2, 0.1), grid.k,
 ################  select.k.func_lasso_cv function  ###################
 ######################################################################
 
-select.k.func_lasso_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_type="rmse") 
+select.k.func_ridge_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_type="rmse") 
 {
   obj = NULL
   grid.k = grid.k[grid.k > as.integer((1 - max.tau) * n) + 
@@ -161,17 +161,17 @@ select.k.func_lasso_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_typ
     registerDoSNOW(myCluster)
     
     
-    rq1=  foreach(kk = 1:length(taus),.options.snow=opts,.export = "cv_ThreeStage_lasso",.combine = cbind,.packages =c("caret","rqPen","xts"))%dopar%{
+    rq1=  foreach(kk = 1:length(taus),.options.snow=opts,.export = "cv_ThreeStage_ridge",.combine = cbind,.packages =c("caret","hqreg","xts"))%dopar%{
       
       if(cv_type=='rmse'){
-        cv.fit=cv.rq.pen(x,as.vector(Lam.y),tau=taus[kk], intercept=T)
+        cv.fit=cv.hqreg(x,as.vector(Lam.y),tau=taus[kk],alpha = 0)
         
-        out=LASSO.fit((as.vector(Lam.y)),x,  tau=taus[kk], lambda=cv.fit$lambda.min, intercept=T,coef.cutoff=10^(-7))
+        out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile",tau=taus[kk], lambda=cv.fit$lambda.min,alpha = 0)
       }
       if(cv_type=='f2'){
-        cv.fit=cv_ThreeStage_lasso((as.vector(Lam.y)),x, tau=taus[kk])
-        
-        out=LASSO.fit((as.vector(Lam.y)),x,  tau=taus[kk], lambda=cv.fit$lambda.opt, intercept=T,coef.cutoff=10^(-7))
+        cv.fit=cv_ThreeStage_lasso(y = (as.vector(Lam.y)),x = x, tau=taus[kk])
+#        out=LASSO.fit((as.vector(Lam.y)),x,  tau=taus[kk], lambda=cv.fit$lambda.opt, intercept=T,coef.cutoff=10^(-7))
+        out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile" ,tau=taus[kk], lambda=cv.fit$lambda.opt,alpha = 0)
       }
       
       
@@ -206,11 +206,6 @@ select.k.func_lasso_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_typ
   k = grid.k[idx]
   return(k)
 }
-
-
-
-
-
 ######################################################################
 ###################  cv_ThreeStage_lasso function  ###################
 ######################################################################
@@ -221,7 +216,7 @@ select.k.func_lasso_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_typ
 # In other words, we don't need to care cv_type ="rmse" in substance.
 # Theoritical background is in section 3. STEP II.
 
-cv_ThreeStage_lasso <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
+cv_ThreeStage_ridge <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
   y=as.vector(y[!is.na(y)])
   x=x[!is.na(y),]
   folds <- createFolds(y, k = nfolds, list = FALSE)
@@ -235,7 +230,7 @@ cv_ThreeStage_lasso <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
       train_ind=which(folds!=k)
       test_ind=which(folds==k)
       
-      fit=LASSO.fit(y[train_ind],x[train_ind,],  tau, lambda=seq.lambda[grid.lamm], intercept=T,coef.cutoff=10^(-7))
+      fit=hqreg(y = y[train_ind],X = x[train_ind,],tau = tau,method = "quantile" ,lambda=seq.lambda[grid.lamm],alpha = 0)
       yhat= cbind(1, x[test_ind,]) %*%fit
       
       if(cv_type=='rmse'){
@@ -261,7 +256,7 @@ cv_ThreeStage_lasso <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
         train_ind=which(folds!=k)
         test_ind=which(folds==k)
         
-        fit=LASSO.fit(y[train_ind],x[train_ind,],  tau, lambda=seq.lambda[grid.lamm], intercept=T,coef.cutoff=10^(-7))
+        fit=hqreg(y = y[train_ind],X = x[train_ind,],tau = tau,method = "quantile" ,lambda=seq.lambda[grid.lamm],alpha = 0)
         yhat= cbind(1, x[test_ind,]) %*%fit
         cv_error[k,grid.lamm]= sqrt(mean(  (yhat-y[test_ind])^2 , na.rm=T ) )
         
@@ -304,8 +299,11 @@ PowT.1tau.func_lasso_cv<-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
     idx.keep <- which(!is.na(Lam.y))
     Lam.y <- Lam.y[idx.keep]
     x2 <- x[idx.keep, ]
-    cv.fit=cv.rq.pen(x2, (as.vector(Lam.y)),tau=tau,intercept=T)
-    fit=LASSO.fit((as.vector(Lam.y)),x2,  tau, lambda=cv.fit$lambda.min, intercept=T,coef.cutoff=10^(-7))
+    #cv.fit=cv.rq.pen(x2, (as.vector(Lam.y)),tau=tau,intercept=T)
+    #fit=LASSO.fit((as.vector(Lam.y)),x2,  tau, lambda=cv.fit$lambda.min, intercept=T,coef.cutoff=10^(-7))
+    
+    cv.fit=cv.hqreg(X = x2,y = as.vector(Lam.y),tau=taus[kk],alpha = 0)
+    fit=hqreg(y = (as.vector(Lam.y)),X = x2,method = "quantile",tau=taus[kk], lambda=cv.fit$lambda.min,alpha = 0)
     
     res <- (as.vector(Lam.y))- (cbind(1,x2)%*%fit)[,1]
     res <- round(res, 10)
@@ -328,7 +326,6 @@ PowT.1tau.func_lasso_cv<-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
 ######################################################################
 
 # This function estimates the extreme values of PM2.5.
-ThreeStage
 
 ThreeStage_lasso_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1), grid.k, 
                                tau.lam, a = 0, tol = 1e-04,cv_type="rmse") 
@@ -377,17 +374,17 @@ ThreeStage_lasso_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1)
   
   ########### Parallel computation for fitting intermediate quantiles model with power transformation ########### 
   
-  rq1=  foreach(kk = 1:length(taus),.options.snow=opts,.export = "cv_ThreeStage_lasso",.combine = cbind,.packages =c("caret","rqPen","xts"))%dopar%{
+  rq1=  foreach(kk = 1:length(taus),.options.snow=opts,.export = "cv_ThreeStage_ridge",.combine = cbind,.packages =c("caret","hqreg","xts"))%dopar%{
     
     if(cv_type=='rmse'){
-      cv.fit=cv.rq.pen(x,as.vector(Lam.y),tau=taus[kk], intercept=T)
+      cv.fit=cv.hqreg(x,as.vector(Lam.y),tau=taus[kk],alpha = 0)
       
-      out=LASSO.fit((as.vector(Lam.y)),x,  tau=taus[kk], lambda=cv.fit$lambda.min, intercept=T,coef.cutoff=10^(-7))
+      out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile",tau=taus[kk], lambda=cv.fit$lambda.min,alpha = 0)
     }
     if(cv_type=='f2'){
-      cv.fit=cv_ThreeStage_lasso((as.vector(Lam.y)),x, tau=taus[kk])
-      
-      out=LASSO.fit((as.vector(Lam.y)),x,  tau=taus[kk], lambda=cv.fit$lambda.opt, intercept=T,coef.cutoff=10^(-7))
+      cv.fit=cv_ThreeStage_lasso(y = (as.vector(Lam.y)),x = x, tau=taus[kk])
+      #        out=LASSO.fit((as.vector(Lam.y)),x,  tau=taus[kk], lambda=cv.fit$lambda.opt, intercept=T,coef.cutoff=10^(-7))
+      out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile" ,tau=taus[kk], lambda=cv.fit$lambda.opt,alpha = 0)
     }
     
     
