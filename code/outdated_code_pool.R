@@ -225,7 +225,7 @@ ThreeStage_CVRIDGE_parallel=function(data,tau.es=tau.e_Vec,tau.lams= tau.lam_Vec
     one_model=ThreeStage_ridge_cv(y = data$trainy,x = as.matrix(data$trainx[,names(data$trainx)[c(1:4,6:10)]]),
                                   xstar = data$testx[,c(1:4,6:10)],
                                   tau.e = tau.es,
-                                  grid.lam=seq(-2,2,by=0.1),grid.k=seq(10,300,by = 10), tau.lam=tau.lam_fixed)
+                                  grid.lam=seq(-2,2,by=0.1),grid.k=seq(10,300,by = 10), tau.lam=tau.lam_fixed,cv_type = "f2")
     
     one_list[[paste0("taulam",as.character(tau.lam_fixed))]]=one_model
   }
@@ -233,7 +233,7 @@ ThreeStage_CVRIDGE_parallel=function(data,tau.es=tau.e_Vec,tau.lams= tau.lam_Vec
 }
 
 ThreeStage_CVRIDGE_out_parallel = list()
-for (j in region_name[c(1,6,10,15,20)]){
+for (j in region_name[c(1)]){
   print(j)
   one_region=ThreeStage_CVRIDGE_parallel(outlist[[j]])
   ThreeStage_CVRIDGE_out_parallel[[j]] =one_region
@@ -243,9 +243,17 @@ for (j in region_name[c(1,6,10,15,20)]){
 save(ThreeStage_CVRIDGE_out_parallel,file = "./data/0306some_region_ThreeStage_CVRIDGE_out_parallel.R")
 
 
+test1=ThreeStage_CVRIDGE_out_parallel$강남구
+test2=ThreeStage_CVRIDGE_out_parallel$광진구
+
+validation_tool(as.vector(outlist$강남구$testy),test1$taulam0.95$Q3StageP[,2])
+
+plot(as.vector(outlist$강남구$testy))
+plot(test1$taulam0.95$Q3StageP[,3])
+
+plot(test2$taulam0.95$Q3StageP[,2])
+
 #ThreeStage_CVLASSO_out_parallel
-
-
 
 ##### Performance of TS and TSL #####
 library(xtable)
@@ -840,5 +848,8 @@ sum(basic_df_perf$senc <= out_TSL$senc,na.rm = T)
 
 xtable::xtable(basic_df)
 xtable::xtable(out_TSL)
+
+
+
 
 
