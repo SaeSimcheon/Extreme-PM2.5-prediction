@@ -215,7 +215,7 @@ for (j in region_name){
 warnings()
 
 save(bacigThreeStage_out_parallel,file = "./data/0217bacigThreeStage_out_parallel.R")
-##### ThreeStage_LassoCV Tuning with tau.lam ##### 
+##### ThreeStage_ridgeCV Tuning with tau.lam ##### 
 
 ThreeStage_CVLASSO_parallel=function(data,tau.es=tau.e_Vec,tau.lams= tau.lam_Vec){
   one_list = list()

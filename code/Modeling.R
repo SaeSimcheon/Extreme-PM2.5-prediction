@@ -169,7 +169,7 @@ select.k.func_ridge_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_typ
         out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile",tau=taus[kk], lambda=cv.fit$lambda.min,alpha = 0)
       }
       if(cv_type=='f2'){
-        cv.fit=cv_ThreeStage_lasso(y = (as.vector(Lam.y)),x = x, tau=taus[kk])
+        cv.fit=cv_ThreeStage_ridge(y = (as.vector(Lam.y)),x = x, tau=taus[kk])
 #        out=LASSO.fit((as.vector(Lam.y)),x,  tau=taus[kk], lambda=cv.fit$lambda.opt, intercept=T,coef.cutoff=10^(-7))
         out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile" ,tau=taus[kk], lambda=cv.fit$lambda.opt,alpha = 0)
       }
@@ -279,7 +279,7 @@ cv_ThreeStage_ridge <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
 # This function estimates optimal lambda which is used to transform PM2.5(response variable) in 'ThreeStage_lasso_cv' function.
 # More details in section 3. STEP I.
 
-PowT.1tau.func_lasso_cv<-function (y, x, tau, lams = seq(-2, 2, 0.1), a) 
+PowT.1tau.func_ridge_cv<-function (y, x, tau, lams = seq(-2, 2, 0.1), a) 
 {
   n <- length(y)
   compare.x <- diag(n)
@@ -327,7 +327,7 @@ PowT.1tau.func_lasso_cv<-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
 
 # This function estimates the extreme values of PM2.5.
 
-ThreeStage_lasso_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1), grid.k, 
+ThreeStage_ridge_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1), grid.k, 
                                tau.lam, a = 0, tol = 1e-04,cv_type="rmse") 
 {
   x = as.matrix(x)
@@ -340,7 +340,7 @@ ThreeStage_lasso_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1)
   # Else, use fixed value which is put into by user.
   
   if (length(grid.lam) > 1) {
-    tmp = PowT.1tau.func_lasso_cv(y, x, tau = tau.lam, lams = grid.lam,  a)
+    tmp = PowT.1tau.func_ridge_cv(y, x, tau = tau.lam, lams = grid.lam,  a)
     lam = tmp$lam
   }
   else if (length(grid.lam) == 1)
@@ -355,7 +355,7 @@ ThreeStage_lasso_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1)
   if (length(grid.k) == 1) 
     k = grid.k
   else if (length(grid.k) > 1) 
-    k = select.k.func_lasso_cv(y = y, x = x, Lam.y = Lam.y, lam = lam, a = a, max.tau = max.tau, grid.k = grid.k, n = n)
+    k = select.k.func_ridge_cv(y = y, x = x, Lam.y = Lam.y, lam = lam, a = a, max.tau = max.tau, grid.k = grid.k, n = n)
   tau = 1 - k/n
   taus = seq(tau, max.tau, length = k)
   
@@ -382,7 +382,7 @@ ThreeStage_lasso_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1)
       out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile",tau=taus[kk], lambda=cv.fit$lambda.min,alpha = 0)
     }
     if(cv_type=='f2'){
-      cv.fit=cv_ThreeStage_lasso(y = (as.vector(Lam.y)),x = x, tau=taus[kk])
+      cv.fit=cv_ThreeStage_ridge(y = (as.vector(Lam.y)),x = x, tau=taus[kk])
       #        out=LASSO.fit((as.vector(Lam.y)),x,  tau=taus[kk], lambda=cv.fit$lambda.opt, intercept=T,coef.cutoff=10^(-7))
       out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile" ,tau=taus[kk], lambda=cv.fit$lambda.opt,alpha = 0)
     }
