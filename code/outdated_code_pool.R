@@ -225,7 +225,7 @@ ThreeStage_CVRIDGE_parallel=function(data,tau.es=tau.e_Vec,tau.lams= tau.lam_Vec
     one_model=ThreeStage_ridge_cv(y = data$trainy,x = as.matrix(data$trainx[,names(data$trainx)[c(1:4,6:10)]]),
                                   xstar = data$testx[,c(1:4,6:10)],
                                   tau.e = tau.es,
-                                  grid.lam=seq(-2,2,by=0.1),grid.k=seq(10,300,by = 10), tau.lam=tau.lam_fixed,cv_type = "f2")
+                                  grid.lam=seq(-2,2,by=0.1),grid.k=seq(10,300,by = 10), tau.lam=tau.lam_fixed)
     
     one_list[[paste0("taulam",as.character(tau.lam_fixed))]]=one_model
   }
@@ -242,16 +242,21 @@ for (j in region_name[c(1)]){
 #save(ThreeStage_CVRIDGE_out_parallel,file = "./data/0306ThreeStage_CVRIDGE_out_parallel.R")
 save(ThreeStage_CVRIDGE_out_parallel,file = "./data/0306some_region_ThreeStage_CVRIDGE_out_parallel.R")
 
-
+warnings()
 test1=ThreeStage_CVRIDGE_out_parallel$강남구
 test2=ThreeStage_CVRIDGE_out_parallel$광진구
 
-validation_tool(as.vector(outlist$강남구$testy),test1$taulam0.95$Q3StageP[,2])
+validation_tool(as.vector(outlist$강남구$testy),test1$taulam0.95$Q3StageP[,4])
 
+
+par(mfrow=c(2,2))
 plot(as.vector(outlist$강남구$testy))
+plot(test1$taulam0.95$Q3StageP[,1])
+plot(test1$taulam0.95$Q3StageP[,2])
 plot(test1$taulam0.95$Q3StageP[,3])
+plot(test1$taulam0.95$Q3StageP[,4])
 
-plot(test2$taulam0.95$Q3StageP[,2])
+
 
 #ThreeStage_CVLASSO_out_parallel
 

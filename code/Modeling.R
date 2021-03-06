@@ -164,7 +164,7 @@ select.k.func_ridge_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_typ
     rq1=  foreach(kk = 1:length(taus),.options.snow=opts,.export = "cv_ThreeStage_ridge",.combine = cbind,.packages =c("caret","hqreg","xts"))%dopar%{
       
       if(cv_type=='rmse'){
-        cv.fit=cv.hqreg(x,as.vector(Lam.y),tau=taus[kk],alpha = 0)
+        cv.fit=cv.hqreg(x,as.vector(Lam.y),tau=taus[kk],alpha = 0,type.measure = "mse",method = "quantile",lambda=seq(0.01,2,0.01))
         
         out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile",tau=taus[kk], lambda=cv.fit$lambda.min,alpha = 0)
       }
@@ -222,10 +222,10 @@ cv_ThreeStage_ridge <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
   folds <- createFolds(y, k = nfolds, list = FALSE)
   
   
+  seq.lambda=seq(0.01,2,0.01)
+  cv_error<-matrix(nrow=nfolds, ncol=length(seq.lambda)) # default ; 10 fold CV
   
-  cv_error<-matrix(nrow=nfolds, ncol=50) # default ; 10 fold CV
-  seq.lambda=seq(0.01,5, length.out=50)
-  for(grid.lamm in 1:50){
+  for(grid.lamm in 1:length(seq.lambda)){
     for(k in 1:nfolds){
       train_ind=which(folds!=k)
       test_ind=which(folds==k)
@@ -251,7 +251,7 @@ cv_ThreeStage_ridge <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
   opt_tau=which.max(apply(cv_error, 2, mean, na.rm=T))
   if(length(opt_tau)==0){
     print('zero cases. Use RMSE criteria instead')
-    for(grid.lamm in 1:50){
+    for(grid.lamm in 1:length(seq.lambda)){
       for(k in 1:nfolds){
         train_ind=which(folds!=k)
         test_ind=which(folds==k)
@@ -302,7 +302,7 @@ PowT.1tau.func_ridge_cv<-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
     #cv.fit=cv.rq.pen(x2, (as.vector(Lam.y)),tau=tau,intercept=T)
     #fit=LASSO.fit((as.vector(Lam.y)),x2,  tau, lambda=cv.fit$lambda.min, intercept=T,coef.cutoff=10^(-7))
     
-    cv.fit=cv.hqreg(X = x2,y = as.vector(Lam.y),tau=tau,alpha = 0)
+    cv.fit=cv.hqreg(X = x2,y = as.vector(Lam.y),tau=tau,alpha = 0,type.measure = "mse",method = "quantile",lambda=seq(0.01,2,0.01))
     fit=hqreg(y = (as.vector(Lam.y)),X = x2,method = "quantile",tau=tau, lambda=cv.fit$lambda.min,alpha = 0)
     
     res <- (as.vector(Lam.y))- (cbind(1,x2)%*%fit$beta)[,1]
@@ -377,7 +377,7 @@ ThreeStage_ridge_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1)
   rq1=  foreach(kk = 1:length(taus),.options.snow=opts,.export = "cv_ThreeStage_ridge",.combine = cbind,.packages =c("caret","hqreg","xts"))%dopar%{
     
     if(cv_type=='rmse'){
-      cv.fit=cv.hqreg(x,as.vector(Lam.y),tau=taus[kk],alpha = 0)
+      cv.fit=cv.hqreg(x,as.vector(Lam.y),tau=taus[kk],alpha = 0,type.measure = "mse",method = "quantile",lambda=seq(0.01,2,0.01))
       
       out=hqreg(y = (as.vector(Lam.y)),X = x,method = "quantile",tau=taus[kk], lambda=cv.fit$lambda.min,alpha = 0)
     }
