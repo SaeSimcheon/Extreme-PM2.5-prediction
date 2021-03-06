@@ -11,7 +11,7 @@ for (j in region_name){
   outlist[[j]] =one_region
 }
 #save(outlist,file = "./data/0119All_regions.R")
-load("./data/0119All_regions.R")
+load("./data/0119All_regions.Rdata")
 
 ##### Figure 1 and Table 1 were written manually #####
 ##### Table2 code #####
@@ -839,3 +839,5 @@ sum(basic_df_perf$senc <= out_TSL$senc,na.rm = T)
 
 xtable::xtable(basic_df)
 xtable::xtable(out_TSL)
+
+
