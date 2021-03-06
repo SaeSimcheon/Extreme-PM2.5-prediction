@@ -175,7 +175,7 @@ select.k.func_ridge_cv= function (y, x, Lam.y, lam, a, max.tau, grid.k, n,cv_typ
       }
       
       
-      return(out)}
+      return(out$beta)}
     
     stopCluster(myCluster)
     
@@ -231,7 +231,7 @@ cv_ThreeStage_ridge <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
       test_ind=which(folds==k)
       
       fit=hqreg(y = y[train_ind],X = x[train_ind,],tau = tau,method = "quantile" ,lambda=seq.lambda[grid.lamm],alpha = 0)
-      yhat= cbind(1, x[test_ind,]) %*%fit
+      yhat= cbind(1, x[test_ind,]) %*%fit$beta
       
       if(cv_type=='rmse'){
         cv_error[k,grid.lamm]= sqrt(mean(  (yhat-y[test_ind])^2 , na.rm=T ) )
@@ -257,7 +257,7 @@ cv_ThreeStage_ridge <-function(y, x,tau, nfolds=10, cv_type='f2',threshold=76){
         test_ind=which(folds==k)
         
         fit=hqreg(y = y[train_ind],X = x[train_ind,],tau = tau,method = "quantile" ,lambda=seq.lambda[grid.lamm],alpha = 0)
-        yhat= cbind(1, x[test_ind,]) %*%fit
+        yhat= cbind(1, x[test_ind,]) %*%fit$beta
         cv_error[k,grid.lamm]= sqrt(mean(  (yhat-y[test_ind])^2 , na.rm=T ) )
         
         
@@ -302,13 +302,13 @@ PowT.1tau.func_ridge_cv<-function (y, x, tau, lams = seq(-2, 2, 0.1), a)
     #cv.fit=cv.rq.pen(x2, (as.vector(Lam.y)),tau=tau,intercept=T)
     #fit=LASSO.fit((as.vector(Lam.y)),x2,  tau, lambda=cv.fit$lambda.min, intercept=T,coef.cutoff=10^(-7))
     
-    cv.fit=cv.hqreg(X = x2,y = as.vector(Lam.y),tau=taus[kk],alpha = 0)
-    fit=hqreg(y = (as.vector(Lam.y)),X = x2,method = "quantile",tau=taus[kk], lambda=cv.fit$lambda.min,alpha = 0)
+    cv.fit=cv.hqreg(X = x2,y = as.vector(Lam.y),tau=tau,alpha = 0)
+    fit=hqreg(y = (as.vector(Lam.y)),X = x2,method = "quantile",tau=tau, lambda=cv.fit$lambda.min,alpha = 0)
     
-    res <- (as.vector(Lam.y))- (cbind(1,x2)%*%fit)[,1]
+    res <- (as.vector(Lam.y))- (cbind(1,x2)%*%fit$beta)[,1]
     res <- round(res, 10)
     
-    bhat <- rbind(bhat, fit)
+    bhat <- rbind(bhat, fit$beta)
     score <- tau - 1 * (res <= 0)
     Rn <- compare.x[idx.keep, idx.keep] * score
     Rn <- apply(Rn, 2, sum)/n
@@ -388,7 +388,7 @@ ThreeStage_ridge_cv<-function (y, x, xstar, tau.e, grid.lam =seq(-0.5, 1.5, 0.1)
     }
     
     
-    return(out)}
+    return(out$beta)}
   
   stopCluster(myCluster)
   

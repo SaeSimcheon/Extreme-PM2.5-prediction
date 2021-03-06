@@ -216,11 +216,13 @@ warnings()
 
 save(bacigThreeStage_out_parallel,file = "./data/0217bacigThreeStage_out_parallel.R")
 ##### ThreeStage_ridgeCV Tuning with tau.lam ##### 
+tau.e_Vec =c(0.950, 0.980, 0.990, 0.995)
+tau.lam_Vec = c(0.95)
 
-ThreeStage_CVLASSO_parallel=function(data,tau.es=tau.e_Vec,tau.lams= tau.lam_Vec){
+ThreeStage_CVRIDGE_parallel=function(data,tau.es=tau.e_Vec,tau.lams= tau.lam_Vec){
   one_list = list()
   for (tau.lam_fixed in tau.lams){
-    one_model=ThreeStage_lasso_cv(y = data$trainy,x = as.matrix(data$trainx[,names(data$trainx)[c(1:4,6:10)]]),
+    one_model=ThreeStage_ridge_cv(y = data$trainy,x = as.matrix(data$trainx[,names(data$trainx)[c(1:4,6:10)]]),
                                   xstar = data$testx[,c(1:4,6:10)],
                                   tau.e = tau.es,
                                   grid.lam=seq(-2,2,by=0.1),grid.k=seq(10,300,by = 10), tau.lam=tau.lam_fixed)
@@ -230,19 +232,18 @@ ThreeStage_CVLASSO_parallel=function(data,tau.es=tau.e_Vec,tau.lams= tau.lam_Vec
   return(one_list)
 }
 
-
-ThreeStage_CVLASSO_out_parallel = list()
-for (j in region_name){
+ThreeStage_CVRIDGE_out_parallel = list()
+for (j in region_name[c(1,6,10,15,20)]){
   print(j)
-  one_region=ThreeStage_CVLASSO_parallel(outlist[[j]])
-  ThreeStage_CVLASSO_out_parallel[[j]] =one_region
+  one_region=ThreeStage_CVRIDGE_parallel(outlist[[j]])
+  ThreeStage_CVRIDGE_out_parallel[[j]] =one_region
 }
 
-save(ThreeStage_CVLASSO_out_parallel,file = "./data/0217ThreeStage_CVLASSO_out_parallel.R")
+#save(ThreeStage_CVRIDGE_out_parallel,file = "./data/0306ThreeStage_CVRIDGE_out_parallel.R")
+save(ThreeStage_CVRIDGE_out_parallel,file = "./data/0306some_region_ThreeStage_CVRIDGE_out_parallel.R")
 
 
-
-ThreeStage_CVLASSO_out_parallel
+#ThreeStage_CVLASSO_out_parallel
 
 
 
