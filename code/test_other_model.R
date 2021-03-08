@@ -86,10 +86,7 @@ sum(oneone$mean>76)
 
 
 ##### quantile regression #####
-
-
 library(quantreg)
-
 testset=data.frame(data$testx)
 names(testset) = names(data$trainx)
 
@@ -98,12 +95,10 @@ rqfit98=rq(data$trainy~.,data = data.frame(data$trainx[,names(data$trainx)[c(1:4
 rqfit99=rq(data$trainy~.,data = data.frame(data$trainx[,names(data$trainx)[c(1:4,6:10)]]),tau = 0.99)
 rqfit995=rq(data$trainy~.,data = data.frame(data$trainx[,names(data$trainx)[c(1:4,6:10)]]),tau = 0.995)
 
-
 pred95=predict(rqfit95,testset)
 pred98=predict(rqfit98,testset)
 pred99=predict(rqfit99,testset)
 pred995=predict(rqfit995,testset)
-
 
 validation_tool(as.vector(data$testy),pred95)
 validation_tool(as.vector(data$testy),pred98)
@@ -112,6 +107,9 @@ validation_tool(data$testy,pred995)
 
 plot(data$testy)
 
-
 data=outlist$강남구
 data$trainy
+
+
+
+
