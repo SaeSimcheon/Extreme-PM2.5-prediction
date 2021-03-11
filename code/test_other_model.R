@@ -111,5 +111,30 @@ data=outlist$강남구
 data$trainy
 
 
+basic_qr = function(data,taue){
+  one_list = list()
+  one_model=rq(data$trainy~.,data = data.frame(data$trainx[,names(data$trainx)[c(1:4,6:10)]]), tau = taue)
+  tdt = data.frame(data$testx[,c(1:4,6:10)])
+  names(tdt) = names(data$trainx)[c(1:4,6:10)]
+  pred= predict(one_model,tdt)
+  one_list[["rq_predict"]]=pred
+  return(one_list)
+}
+
+
+
+basicqr_out_95 = list()
+
+for (j in region_name){
+  one_region=basic_qr(outlist[[j]],taue = 0.95)
+  basicqr_out_95[[j]] =one_region
+}
+
+test1=basicqr_out$강남구
+
+
+validation_tool(as.vector(outlist$강남구$testy),as.vector(test1$rq_predict))
+
+
 
 
