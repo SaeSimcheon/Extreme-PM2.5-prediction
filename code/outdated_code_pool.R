@@ -180,6 +180,9 @@ png("./data/GN_corrplot.png",width = 500, height = 500)
 GGally::ggcorr(forcol_data_GN, nbreaks=8, palette='RdGy', label=TRUE, label_size=5, label_color='white')
 dev.off()
 
+
+
+# Comparison #
 ##### ThreeStage Tuning with tau.lam ##### 
 tau.e_Vec =c(0.950, 0.980, 0.990, 0.995)
 tau.lam_Vec = c(0.95)
@@ -286,6 +289,28 @@ for (j in region_name){
   basicqr_out_995[[j]] =one_region
 }
 
+
+
+
+
+
+
+
+##### SARIMAX #####
+testdata = outlist[["강남구"]]
+
+
+m = auto.arima(y = as.vector(testdata$trainy),xreg = as.matrix(testdata$trainx[,names(data$trainx)[c(1:4,6:10)]]))
+
+m <- arima(as.vector(testdata$trainy), order = c(4,1,4), seasonal = list(order = c(2,1,2), period = 12), 
+           xreg = as.matrix(testdata$trainx[,names(data$trainx)[c(1:4,6:10)]])
+           , method = 'ML')
+
+f <- forecast(m, h = 2199, xreg =as.matrix(testdata$testx[,names(data$trainx)[c(1:4,6:10)]]) )
+
+plot(f$mean)
+?forecast
+##############
 
 
 
@@ -444,12 +469,12 @@ latex_perf_ftn = function(true,data1,data2,data3,
                        "\\cline{2-7} \n",
                         "& \\multirow{4}{*}{Basic Quantile Regression} \n")
   
-  print(xtable(texbind,digits = c(NA,NA,NA,NA,3,3,3,3)), add.to.row = addtorow, include.colnames = FALSE,include.rownames=FALSE)
-  #print(texbind)
+  #print(xtable(texbind,digits = c(NA,NA,NA,NA,3,3,3,3)), add.to.row = addtorow, include.colnames = FALSE,include.rownames=FALSE)
+  print(texbind)
 }
 
 
-for (i in c(1,11,21)){
+for (i in 1:25){
   print(region_name[i])
   latex_perf_ftn(outlist[[region_name[i]]],
                bacigThreeStage_out_parallel[[region_name[i]]],
@@ -974,5 +999,8 @@ sum(basic_df_perf$senc <= out_TSL$senc,na.rm = T)
 
 xtable::xtable(basic_df)
 xtable::xtable(out_TSL)
+
+
+
 
 
