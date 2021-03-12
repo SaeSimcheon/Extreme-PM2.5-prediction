@@ -1,5 +1,5 @@
 ##### Setup #####
-
+library(xtable)
 source("./EXRQ_research/code/Modeling.R",encoding = "utf-8")
 source("./EXRQ_research/code/DataPreprocessing.R",encoding = "utf-8")
 
@@ -180,10 +180,6 @@ png("./data/GN_corrplot.png",width = 500, height = 500)
 GGally::ggcorr(forcol_data_GN, nbreaks=8, palette='RdGy', label=TRUE, label_size=5, label_color='white')
 dev.off()
 
-##### 0115~upto0202 #####
-region_name=names(data$Meteorological_data$precip)[names(data$Meteorological_data$precip)!="일시"]
-
-
 ##### ThreeStage Tuning with tau.lam ##### 
 tau.e_Vec =c(0.950, 0.980, 0.990, 0.995)
 tau.lam_Vec = c(0.95)
@@ -246,10 +242,57 @@ ThreeStage_CVLASSO_out_parallel
 
 
 
-##### Performance of TS and TSL #####
-library(xtable)
+##### Basic quantile regression #####
 
-latex_perf_ftn = function(true,data1,data2){
+basic_qr = function(data,taue){
+  one_list = list()
+  one_model=rq(data$trainy~.,data = data.frame(data$trainx[,names(data$trainx)[c(1:4,6:10)]]), tau = taue)
+  tdt = data.frame(data$testx[,c(1:4,6:10)])
+  names(tdt) = names(data$trainx)[c(1:4,6:10)]
+  pred= predict(one_model,tdt)
+  one_list[["rq_predict"]]=pred
+  return(one_list)
+}
+
+
+
+basicqr_out_95 = list()
+
+for (j in region_name){
+  one_region=basic_qr(outlist[[j]],taue = 0.95)
+  basicqr_out_95[[j]] =one_region
+}
+
+basicqr_out_98 = list()
+
+for (j in region_name){
+  one_region=basic_qr(outlist[[j]],taue = 0.98)
+  basicqr_out_98[[j]] =one_region
+}
+
+
+basicqr_out_99 = list()
+
+for (j in region_name){
+  one_region=basic_qr(outlist[[j]],taue = 0.99)
+  basicqr_out_99[[j]] =one_region
+}
+
+
+basicqr_out_995 = list()
+
+for (j in region_name){
+  one_region=basic_qr(outlist[[j]],taue = 0.995)
+  basicqr_out_995[[j]] =one_region
+}
+
+
+
+
+##### Performance of TS and TSL #####
+
+latex_perf_ftn = function(true,data1,data2,data3,
+                          data4,data5,data6){
   taus3 = c("0.95","0.98","0.99","0.995")
   TS_perf=data1
   TS_perf=TS_perf$taulam0.95
@@ -295,9 +338,98 @@ latex_perf_ftn = function(true,data1,data2){
   
   All_TSL_one_region=cbind(taus3,All_TSL_one_region)
   
+  ##### bQR95 #####
+  
+  bQR_perf=data3
+  bQR_perf=bQR_perf$rq_predict
+  
+  bQR_perf_95=validation_tool(as.vector(One_region_data),as.vector(bQR_perf))
+  
+  
+  
+  All_bQR_one_region_95=data.frame(rbind(
+    c(bQR_perf_95$senc,bQR_perf_95$spec,bQR_perf_95$FN,bQR_perf_95$FP)))
+    #c(TSL_perf_98$senc,TSL_perf_98$spec,TSL_perf_98$FN,TSL_perf_98$FP),
+    #c(TSL_perf_99$senc,TSL_perf_99$spec,TSL_perf_99$FN,TSL_perf_99$FP),
+    #c(TSL_perf_995$senc,TSL_perf_995$spec,TSL_perf_995$FN,TSL_perf_995$FP)))
+  All_bQR_one_region_95=round(All_bQR_one_region_95,3)
+  
+  All_bQR_one_region_95=cbind(c(taus3[1]),All_bQR_one_region_95)
+  
+  
+  
+  names(All_bQR_one_region_95) = names(All_TSL_one_region)
+  ##### bQR98 #####
+  
+  bQR_perf=data4
+  bQR_perf=bQR_perf$rq_predict
+  
+  bQR_perf_98=validation_tool(as.vector(One_region_data),as.vector(bQR_perf))
+  
+  
+  
+  All_bQR_one_region_98=data.frame(rbind(
+    c(bQR_perf_98$senc,bQR_perf_98$spec,bQR_perf_98$FN,bQR_perf_98$FP)))
+  #c(TSL_perf_98$senc,TSL_perf_98$spec,TSL_perf_98$FN,TSL_perf_98$FP),
+  #c(TSL_perf_99$senc,TSL_perf_99$spec,TSL_perf_99$FN,TSL_perf_99$FP),
+  #c(TSL_perf_995$senc,TSL_perf_995$spec,TSL_perf_995$FN,TSL_perf_995$FP)))
+  All_bQR_one_region_98=round(All_bQR_one_region_98,3)
+  
+  All_bQR_one_region_98=cbind(c(taus3[2]),All_bQR_one_region_98)
+  
+  names(All_bQR_one_region_98) = names(All_TSL_one_region)
+  ##### bQR99 #####
+  
+  bQR_perf=data5
+  bQR_perf=bQR_perf$rq_predict
+  
+  bQR_perf_99=validation_tool(as.vector(One_region_data),as.vector(bQR_perf))
+  
+  
+  
+  All_bQR_one_region_99=data.frame(rbind(
+    c(bQR_perf_99$senc,bQR_perf_99$spec,bQR_perf_99$FN,bQR_perf_99$FP)))
+  #c(TSL_perf_98$senc,TSL_perf_98$spec,TSL_perf_98$FN,TSL_perf_98$FP),
+  #c(TSL_perf_99$senc,TSL_perf_99$spec,TSL_perf_99$FN,TSL_perf_99$FP),
+  #c(TSL_perf_995$senc,TSL_perf_995$spec,TSL_perf_995$FN,TSL_perf_995$FP)))
+  All_bQR_one_region_99=round(All_bQR_one_region_99,3)
+  
+  All_bQR_one_region_99=cbind(c(taus3[3]),All_bQR_one_region_99)
+  
+  
+  
+  names(All_bQR_one_region_99) = names(All_TSL_one_region)
+  ##### bQR995 #####
+  
+  bQR_perf=data6
+  bQR_perf=bQR_perf$rq_predict
+  
+  bQR_perf_995=validation_tool(as.vector(One_region_data),as.vector(bQR_perf))
+  
+  
+  
+  All_bQR_one_region_995=data.frame(rbind(
+    c(bQR_perf_995$senc,bQR_perf_995$spec,bQR_perf_995$FN,bQR_perf_995$FP)))
+  #c(TSL_perf_98$senc,TSL_perf_98$spec,TSL_perf_98$FN,TSL_perf_98$FP),
+  #c(TSL_perf_99$senc,TSL_perf_99$spec,TSL_perf_99$FN,TSL_perf_99$FP),
+  #c(TSL_perf_995$senc,TSL_perf_995$spec,TSL_perf_995$FN,TSL_perf_995$FP)))
+  All_bQR_one_region_995=round(All_bQR_one_region_995,3)
+  
+  All_bQR_one_region_995=cbind(c(taus3[4]),All_bQR_one_region_995)
+  
+  
+  
+  names(All_bQR_one_region_995) = names(All_TSL_one_region)
+  
+  
+  
+  
+  
+  
   
   ##### Binding and xtable #####
-  texbind = rbind(All_TS_one_region,All_TSL_one_region,All_TSL_one_region)
+  texbind = rbind(All_TS_one_region,All_TSL_one_region,
+                  All_bQR_one_region_95,All_bQR_one_region_98,All_bQR_one_region_99,All_bQR_one_region_995)
   
   
   texbind=cbind(emp1,emp1,texbind)
@@ -307,12 +439,13 @@ latex_perf_ftn = function(true,data1,data2){
   addtorow$pos <- list(0, 4,4,8,8)
   
   addtorow$command <- c("\\multirow{4}{*}{Three Stage Model} \n",
-                        "\\cline{2-7} \n",
+                       "\\cline{2-7} \n",
                         "& \\multirow{4}{*}{Three Stage Model with LASSO} \n",
-                        "\\cline{2-7} \n",
-                        "& \\multirow{4}{*}{Other model} \n")
+                       "\\cline{2-7} \n",
+                        "& \\multirow{4}{*}{Basic Quantile Regression} \n")
   
   print(xtable(texbind,digits = c(NA,NA,NA,NA,3,3,3,3)), add.to.row = addtorow, include.colnames = FALSE,include.rownames=FALSE)
+  #print(texbind)
 }
 
 
@@ -320,11 +453,13 @@ for (i in c(1,11,21)){
   print(region_name[i])
   latex_perf_ftn(outlist[[region_name[i]]],
                bacigThreeStage_out_parallel[[region_name[i]]],
-               ThreeStage_CVLASSO_out_parallel[[region_name[i]]])
+               ThreeStage_CVLASSO_out_parallel[[region_name[i]]]
+               ,basicqr_out_95[[region_name[i]]]
+               ,basicqr_out_98[[region_name[i]]]
+               ,basicqr_out_99[[region_name[i]]]
+               ,basicqr_out_995[[region_name[i]]])
 }
-
-
-
+as.vector(basicqr_out_995[[region_name[i]]]$rq_predict)
 
 
 
