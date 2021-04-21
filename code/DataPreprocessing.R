@@ -215,3 +215,107 @@ Data_setup=function(data_full,location){
   
   return(outdata)
 }
+
+
+
+
+######################################################################
+###################  Data_setup_for_Deep function  ############################
+######################################################################
+
+Data_setup_for_Deep=function(data_full,location){
+  
+  
+  print(location)
+  print(paste("Is",location,"in data?"))
+  print( location %in% colnames(data_full$Airpollution_data$PM25))
+  
+  TSData<-data.frame(data_full$Airpollution_data$PM25[,location],row.names=data_full$Airpollution_data$PM25$측정일시)
+  
+  ########### Extracting points (after 2015-01-01) and Interpolating missings in PM2.5 ########## 
+  
+  rm_index=c( 1: (which(rownames(TSData)=='2015-01-01 00:00:00' ))) 
+  TSData2=data.frame( TSData[- rm_index , ] , row.names=rownames(TSData)[-rm_index])
+  
+  TSData2[which(is.na(TSData2)==T), ] =approx(TSData2, xout=which(is.na(TSData2)==T))$y
+  TSData=TSData2
+  
+  
+  ###########  Checking the extreme values of PM2.5 ###########  
+  
+  PM25<-as.xts(TSData)
+  PM25=four_hour_avg(PM25) 
+  PM_01=ifelse(PM25<76, 0, 1) 
+  table(PM_01)
+  
+  #############################################################  
+  ###########  Interpolating missing values and Averaging the 4-hour values at each variable ########### 
+  
+  data1=cbind(PM25, PM_01)
+  
+  for(varr in c("Meteorological_data","Airpollution_data")){
+    if(varr=="Meteorological_data"){var_index=c("precip","temp","hum","win","windir")}
+    if(varr=="Airpollution_data"){var_index=c( "CO","NO2","O3","PM10","SO2")}
+    
+    for( i in var_index){
+      TSData<-data.frame(data_full[[varr]][[i]][,location],row.names=data_full$Airpollution_data$PM25$측정일시)
+      TSData2=data.frame( TSData[- rm_index , ] , row.names=rownames(TSData)[-rm_index])
+      missing_t=which(is.na(TSData2)==T)
+      
+      for(tt in missing_t){
+        TSData2[tt,] =  mean( as.matrix(data_full[[varr]][[i]][tt,-1])[1,], na.rm=TRUE)
+      }
+      na_index2=which(is.na(TSData2)==T)
+      
+      TSData=TSData2
+      temp<-as.xts((TSData))
+      temp=four_hour_avg(temp) 
+      data1=cbind(data1, temp)
+    }
+  }
+  
+  colnames(data1)= c("PM25","PM_01","precip","temp","hum","win","windir","CO","NO2","O3","PM10","SO2" )
+  
+  
+  # If there are more than 50 missings in a variable, remove the variable.
+  
+  rm_col<-vector()
+  for(k in 1:ncol(data1)){
+    if( length(which(is.na(data1[,k]==T) ))  >50   ){ 
+      rm_col=c(rm_col, k)
+    }
+  }
+  
+  if(length(rm_col)>0){
+    data1=data1[,-rm_col]}
+  
+  # Remove points in which at least one variable has NA in spite of the preceding procedure.
+  
+  for(k in 1:ncol(data1)){
+    if( length(which(is.na(data1[,k]==T) ))  >0){ 
+      data1=data1[-which(is.na(data1[,k]==T) ) , ]
+    }
+  }
+  
+  full_data=data1
+  time_index= index(full_data)
+  
+  ########### Extracting spring season from every year ###########
+  
+  temp<-list()
+  for(k in 1:ncol(full_data)){
+    temp[[k]]=
+      c(
+        window(xts(full_data[,k], order.by = time_index), start=strptime("2015-01-01 00:00:00", '%Y-%m-%d %H:%M:%S') ,end=strptime("2015-06-01 00:00:00", '%Y-%m-%d %H:%M:%S')),
+        window(xts(full_data[,k], order.by = time_index), start=strptime("2016-01-01 00:00:00", '%Y-%m-%d %H:%M:%S') ,end=strptime("2016-06-01 00:00:00", '%Y-%m-%d %H:%M:%S')),
+        window(xts(full_data[,k], order.by = time_index), start=strptime("2017-01-01 00:00:00", '%Y-%m-%d %H:%M:%S') ,end=strptime("2017-06-01 00:00:00", '%Y-%m-%d %H:%M:%S')),
+        window(xts(full_data[,k], order.by = time_index), start=strptime("2018-01-01 00:00:00", '%Y-%m-%d %H:%M:%S') ,end=strptime("2018-06-01 00:00:00", '%Y-%m-%d %H:%M:%S')),
+        window(xts(full_data[,k], order.by = time_index), start=strptime("2019-01-01 00:00:00", '%Y-%m-%d %H:%M:%S') ,end=strptime("2019-06-01 00:00:00", '%Y-%m-%d %H:%M:%S')),
+        window(xts(full_data[,k], order.by = time_index), start=strptime("2020-01-01 00:00:00", '%Y-%m-%d %H:%M:%S') ,end=strptime("2020-05-30 00:00:00", '%Y-%m-%d %H:%M:%S'))
+        
+        
+      )
+  }
+  
+  return(temp)
+}
